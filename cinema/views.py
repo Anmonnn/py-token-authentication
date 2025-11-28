@@ -19,45 +19,29 @@ from cinema.serializers import (
     OrderSerializer,
     OrderListSerializer,
 )
+from user.permissions import (
+    Denied,
+    IsAdminOrIfAuthenticatedReadOnly,
+    RegularAuthenticatedUsers,
+)
 
 
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-
-    def get_permissions(self):
-        if self.action in ["list", "create"]:
-            permission_classes = [IsAuthenticated]
-        else:
-            permission_classes = [IsAdminUser]
-
-        return [permission() for permission in permission_classes]
+    permission_classes = RegularAuthenticatedUsers
 
 
 class ActorViewSet(viewsets.ModelViewSet):
     queryset = Actor.objects.all()
     serializer_class = ActorSerializer
-
-    def get_permissions(self):
-        if self.action in ["list", "create"]:
-            permission_classes = [IsAuthenticated]
-        else:
-            permission_classes = [IsAdminUser]
-
-        return [permission() for permission in permission_classes]
+    permission_classes = RegularAuthenticatedUsers
 
 
 class CinemaHallViewSet(viewsets.ModelViewSet):
     queryset = CinemaHall.objects.all()
     serializer_class = CinemaHallSerializer
-
-    def get_permissions(self):
-        if self.action in ["list", "create"]:
-            permission_classes = [IsAuthenticated]
-        else:
-            permission_classes = [IsAdminUser]
-
-        return [permission() for permission in permission_classes]
+    permission_classes = RegularAuthenticatedUsers
 
 
 class MovieViewSet(viewsets.ModelViewSet):
@@ -100,11 +84,12 @@ class MovieViewSet(viewsets.ModelViewSet):
         return MovieSerializer
 
     def get_permissions(self):
-        if self.action in ["list", "create", "retrieve"]:
+        if self.action in ["list", "retrieve"]:
             permission_classes = [IsAuthenticated]
-        else:
+        elif self.action in ["create"]:
             permission_classes = [IsAdminUser]
-
+        else:
+            permission_classes = [Denied]
         return [permission() for permission in permission_classes]
 
 
@@ -147,14 +132,17 @@ class MovieSessionViewSet(viewsets.ModelViewSet):
         if self.action in [
             "list",
             "retrieve",
+        ]:
+            permission_classes = [IsAuthenticated]
+        elif self.action in [
             "create",
             "update",
             "partial_update",
             "delete",
         ]:
-            permission_classes = [IsAuthenticated]
-        else:
             permission_classes = [IsAdminUser]
+        else:
+            permission_classes = [Denied]
 
         return [permission() for permission in permission_classes]
 
@@ -170,6 +158,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     )
     serializer_class = OrderSerializer
     pagination_class = OrderPagination
+    permission_classes = RegularAuthenticatedUsers
 
     def get_queryset(self):
         return Order.objects.filter(user=self.request.user)
@@ -182,11 +171,3 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-
-    def get_permissions(self):
-        if self.action in ["list", "create"]:
-            permission_classes = [IsAuthenticated]
-        else:
-            permission_classes = [IsAdminUser]
-
-        return [permission() for permission in permission_classes]

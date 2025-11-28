@@ -11,3 +11,21 @@ class IsAdminOrIfAuthenticatedReadOnly(BasePermission):
             return request.user and request.user.is_authenticated
 
         return False
+
+
+class RegularAuthenticatedUsers(BasePermission):
+    def has_permission(self, request, view):
+        if view.action in ["list"]:
+            return request.user and request.user.is_authenticated
+        elif view.action in ["create"]:
+            return request.user and request.user.is_staff
+        elif view.action in ["destroy"]:
+            return False
+        return False
+        # else:
+        #     permission_classes = [IsAdminOrIfAuthenticatedReadOnly]
+
+
+class Denied(BasePermission):
+    def has_permission(self, request, view):
+        return False
