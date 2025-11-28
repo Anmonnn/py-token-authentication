@@ -21,7 +21,7 @@ from cinema.serializers import (
 )
 from user.permissions import (
     Denied,
-    IsAdminOrIfAuthenticatedReadOnly,
+    OrderAuthenticatedUsers,
     RegularAuthenticatedUsers,
 )
 
@@ -158,7 +158,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     )
     serializer_class = OrderSerializer
     pagination_class = OrderPagination
-    permission_classes = RegularAuthenticatedUsers
+    permission_classes = OrderAuthenticatedUsers
 
     def get_queryset(self):
         return Order.objects.filter(user=self.request.user)

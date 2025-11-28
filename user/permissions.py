@@ -22,8 +22,15 @@ class RegularAuthenticatedUsers(BasePermission):
         elif view.action in ["destroy"]:
             return False
         return False
-        # else:
-        #     permission_classes = [IsAdminOrIfAuthenticatedReadOnly]
+
+
+class OrderAuthenticatedUsers(BasePermission):
+    def has_permission(self, request, view):
+        if view.action in ["list", "create"]:
+            return request.user and request.user.is_authenticated
+        elif view.action in ["destroy"]:
+            return False
+        return False
 
 
 class Denied(BasePermission):
